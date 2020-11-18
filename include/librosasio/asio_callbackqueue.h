@@ -1,17 +1,9 @@
 #pragma once
 
 #include <ros/callback_queue.h>
-#include <ros/console.h>
-#include <cassert>
-#include <cstdlib>
-#include <memory>
-#include <vector>
-#include <thread>
 
 #include <boost/asio.hpp>
 
-/// Single-threaded executor implementation
-// This is the default executor created by rclcpp::spin.
 class AsioCallbackQueue : public ros::CallbackQueue
 {
  public:
@@ -23,7 +15,7 @@ class AsioCallbackQueue : public ros::CallbackQueue
 #endif
 
   /// Default destrcutor.
-  virtual ~AsioCallbackQueue();
+  virtual ~AsioCallbackQueue() = default;
 
   virtual void addCallback(const ros::CallbackInterfacePtr &callback, uint64_t owner_id) override;
 #if BOOST_VERSION <= 106501
@@ -32,7 +24,8 @@ class AsioCallbackQueue : public ros::CallbackQueue
   static void replaceGlobalQueue(boost::asio::io_context &io_context);
 #endif
 
-  void termSignalHandler(const boost::system::error_code &error, int signal_number);
+  static void termSignalHandler(int signal_number);
+  void handleSigTerm(const boost::system::error_code &error, std::size_t bytes_received);
 
  private:
   // Boost Event loop handler
@@ -41,6 +34,7 @@ class AsioCallbackQueue : public ros::CallbackQueue
 #else
   boost::asio::io_context &m_io_context;
 #endif
-  // Construct a signal set registered for process termination.
-  boost::asio::signal_set m_signals;
+  static int m_sigtermFd[2];
+  boost::asio::posix::stream_descriptor m_sigTermStream;
+  char m_socketReadBuffer = 0;
 };

@@ -17,7 +17,7 @@ TestNode::TestNode(boost::asio::io_service& io_context, ros::NodeHandle &_nh):
           [this](const ros::TimerEvent&) {
             auto now = std::chrono::steady_clock::now();
             auto usStamp = std::chrono::duration_cast<std::chrono::microseconds>(now - m_start_stamp).count();
-            std::cout << "@ " << usStamp/1000. << "\tms : ros wall timer CB from thread :\t\t" << std::this_thread::get_id() << "\n";
+            std::cout << "@ " << usStamp/1000. << "\tms : ros timer CB from thread :\t\t" << std::this_thread::get_id() << "\n";
     });
     
 }
