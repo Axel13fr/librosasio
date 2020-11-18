@@ -11,20 +11,20 @@ namespace ros
 extern CallbackQueuePtr g_global_queue;
 }
 
-int AsioCallbackQueue::m_sigtermFd[2];
+int AsioCallbackQueue::m_sigterm_fd[2];
 
 AsioCallbackQueue::AsioCallbackQueue(boost::asio::io_service &io_context)
-    : m_io_context(io_context), m_sigTermStream(io_context)
+    : m_io_context(io_context), m_sig_term_stream(io_context)
 {
-    if(::socketpair(AF_UNIX, SOCK_STREAM, 0, AsioCallbackQueue::m_sigtermFd))
+    if(::socketpair(AF_UNIX, SOCK_STREAM, 0, AsioCallbackQueue::m_sigterm_fd))
     {
         std::cerr << "Couldn't create TERM socketpair\n";
         ::exit(1);
     }
 
-    m_sigTermStream.assign(m_sigtermFd[1]);
-    m_sigTermStream.async_read_some(
-        boost::asio::buffer(&m_socketReadBuffer, 1),
+    m_sig_term_stream.assign(m_sigterm_fd[1]);
+    m_sig_term_stream.async_read_some(
+        boost::asio::buffer(&m_socket_read_buffer, 1),
         [this](const boost::system::error_code& error, std::size_t bytes_received) {
             handleSigTerm(error, bytes_received);
         });
@@ -75,9 +75,9 @@ void AsioCallbackQueue::termSignalHandler(int signal_number)
     ros::requestShutdown();
 
     // send the signal number on the socket to notify Boost that a shutdown is requested
-    char receivedSignal = static_cast<char>(signal_number);
-    const int ret = ::write(AsioCallbackQueue::m_sigtermFd[0], &receivedSignal,
-                      sizeof(receivedSignal));
+    char received_signal = static_cast<char>(signal_number);
+    const int ret = ::write(AsioCallbackQueue::m_sigterm_fd[0], &received_signal,
+                      sizeof(received_signal));
     (void)ret;
 }
 
@@ -87,12 +87,12 @@ void AsioCallbackQueue::handleSigTerm(const boost::system::error_code& error,
     if(!error)
     {
         const auto signal_str = [this]() -> std::string {
-            switch(m_socketReadBuffer)
+            switch(m_socket_read_buffer)
             {
             case SIGINT: return "SIGINT";
             case SIGTERM: return "SIGTERM";
             }
-            return std::to_string(m_socketReadBuffer);
+            return std::to_string(m_socket_read_buffer);
         }();
         std::cout << "Received signal " << signal_str << '\n';
 

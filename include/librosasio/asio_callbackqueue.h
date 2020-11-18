@@ -34,7 +34,7 @@ class AsioCallbackQueue : public ros::CallbackQueue
 #else
   boost::asio::io_context &m_io_context;
 #endif
-  static int m_sigtermFd[2];
-  boost::asio::posix::stream_descriptor m_sigTermStream;
-  char m_socketReadBuffer = 0;
+  static int m_sigterm_fd[2];
+  boost::asio::posix::stream_descriptor m_sig_term_stream;
+  char m_socket_read_buffer = 0;
 };
