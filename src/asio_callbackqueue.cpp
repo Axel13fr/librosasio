@@ -13,7 +13,7 @@ extern CallbackQueuePtr g_global_queue;
 
 int AsioCallbackQueue::m_sigterm_fd[2];
 
-AsioCallbackQueue::AsioCallbackQueue(boost::asio::io_service &io_context)
+AsioCallbackQueue::AsioCallbackQueue(boost::asio::io_service& io_context)
     : m_io_context(io_context), m_sig_term_stream(io_context)
 {
     if(::socketpair(AF_UNIX, SOCK_STREAM, 0, AsioCallbackQueue::m_sigterm_fd))
@@ -45,23 +45,25 @@ AsioCallbackQueue::AsioCallbackQueue(boost::asio::io_service &io_context)
     }
 }
 
-void AsioCallbackQueue::addCallback(const ros::CallbackInterfacePtr &callback, uint64_t owner_id)
+void AsioCallbackQueue::addCallback(const ros::CallbackInterfacePtr& callback,
+                                    uint64_t owner_id)
 {
-  ros::CallbackQueue::addCallback(callback, owner_id);
-#if BOOST_VERSION <= 106501
-  m_io_context.post([this]
+    ros::CallbackQueue::addCallback(callback, owner_id);
+#if BOOST_VERSION < 106600
+    m_io_context.post([this]
 #else
-  boost::asio::post(m_io_context, [this]
+    boost::asio::post(m_io_context, [this]
 #endif
-                    {
-                      // This post() will be called once per callback to process so only process one at a time
-                      callOne();
-                    });
+                      {
+                          // This post() will be called once per callback to process so
+                          // only process one at a time
+                          callOne();
+                      });
 }
 
-void AsioCallbackQueue::replaceGlobalQueue(boost::asio::io_service &io_context)
+void AsioCallbackQueue::replaceGlobalQueue(boost::asio::io_service& io_context)
 {
-  ros::g_global_queue.reset(new AsioCallbackQueue(io_context));
+    ros::g_global_queue.reset(new AsioCallbackQueue(io_context));
 }
 
 void AsioCallbackQueue::termSignalHandler(int signal_number)
@@ -77,7 +79,7 @@ void AsioCallbackQueue::termSignalHandler(int signal_number)
     // send the signal number on the socket to notify Boost that a shutdown is requested
     char received_signal = static_cast<char>(signal_number);
     const int ret = ::write(AsioCallbackQueue::m_sigterm_fd[0], &received_signal,
-                      sizeof(received_signal));
+                            sizeof(received_signal));
     (void)ret;
 }
 
