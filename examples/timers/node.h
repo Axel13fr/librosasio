@@ -1,15 +1,14 @@
 #pragma once
 
-#include <ros/timer.h>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <chrono> 
+#include <chrono>
+#include <ros/timer.h>
 
 class TestNode
 {
 public:
- TestNode(boost::asio::io_service &io_context,ros::NodeHandle &_nh);
- virtual ~TestNode() = default;
+    TestNode(boost::asio::io_service& io_context, ros::NodeHandle& _nh);
 
 private:
     void onAsioTimer(const boost::system::error_code& error);
