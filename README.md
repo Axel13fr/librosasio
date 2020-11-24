@@ -38,7 +38,7 @@ int main(int _argc, char ** _argv)
 * [Simple example](examples/timers)
 
 # Motivations
-The boost asio library can be useful for ROS nodes using network communications (tcp/ip, modbus, canbus, bluetooth ...).
+The boost asio library can be useful for ROS nodes using network sockets,timers...
 
 Unfortunatly both boost asio and ROS need to have their own event loop spinning : `ros::spin()` for ROS, `io_service.run()` for boost Asio.
 
