@@ -5,8 +5,12 @@
 
 int main(int argc, char* argv[])
 {
-  // SigInt is handled directly by boost asio
+  // Boost Event loop handler
+#if BOOST_VERSION <= 106501
   boost::asio::io_service io_context;
+#else
+  boost::asio::io_context m_io_context;
+#endif
 
   // Static Function Call doing the magic to unify event loops
   AsioCallbackQueue::replaceGlobalQueue(io_context);

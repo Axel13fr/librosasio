@@ -8,9 +8,12 @@ add_compile_options(-std=c++14 -Wall -Werror=return-type -fext-numeric-literals)
 find_package(catkin REQUIRED COMPONENTS roscpp)
 find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
-    CATKIN_DEPENDS
-    roscpp)
+    INCLUDE_DIRS include
+    LIBRARIES librosasio
+    CATKIN_DEPENDS roscpp
+    DEPENDS Boost::system)
 
+# Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
