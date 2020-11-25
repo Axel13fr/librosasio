@@ -12,7 +12,7 @@ In your main.cpp init the node in the following way :
 int main(int _argc, char ** _argv)
 {
   // Boost Event loop handler
-#if BOOST_VERSION <= 106501
+#if BOOST_VERSION <= 106600
   // Version 1.65 on ROS Melodic
   boost::asio::io_service io_context;
 #else
@@ -55,3 +55,6 @@ However this method reduces the application reactivity to the frequency of the `
 Use one thread for each event loop. Using this method the callbacks from boost Asio and from ROS are called without any latency.
 The ROS callbacks are called from another thread, so we have to take care to protect any shared ressources with locking mechanisms like mutexes or mailboxes.
 
+# Known issues
+
+Using this library with ROS Kinetic and stopping it via CTRL+C will make the node crash instead of stopping cleanly.
