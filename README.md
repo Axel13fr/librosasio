@@ -1,4 +1,4 @@
-# librosasio
+# librosasio [![Build Status](https://travis-ci.com/Axel13fr/librosasio.svg?branch=master)](https://travis-ci.com/Axel13fr/librosasio)
 
 ## Description
 
