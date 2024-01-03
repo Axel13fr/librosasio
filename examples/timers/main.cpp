@@ -7,9 +7,9 @@ int main(int argc, char* argv[])
 {
     // Boost Event loop handler
 #if BOOST_VERSION < 106600
-    boost::asio::io_service io_context;
+    auto io_context = std::make_shared<boost::asio::io_service>();
 #else
-    boost::asio::io_context io_context;
+    auto io_context = std::make_shared<boost::asio::io_context>();
 #endif
 
     // Static Function Call doing the magic to unify event loops
@@ -17,9 +17,9 @@ int main(int argc, char* argv[])
     ros::init(argc, argv, "test_node", ros::init_options::NoSigintHandler);
 
     ros::NodeHandle nh("TestNode");
-    TestNode node(io_context, nh);
+    TestNode node(*io_context, nh);
 
-    io_context.run();
+    io_context->run();
     std::cout << "Execution finished" << std::endl;
 
     ros::shutdown();

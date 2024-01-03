@@ -13,8 +13,9 @@ extern CallbackQueuePtr g_global_queue;
 
 int AsioCallbackQueue::m_sigterm_fd[2];
 
-AsioCallbackQueue::AsioCallbackQueue(boost::asio::io_service& io_context)
-    : m_io_context(io_context), m_sig_term_stream(io_context)
+AsioCallbackQueue::AsioCallbackQueue(
+    const std::shared_ptr<boost::asio::io_service>& io_context)
+    : m_io_context(io_context), m_sig_term_stream(*io_context)
 {
     if(::socketpair(AF_UNIX, SOCK_STREAM, 0, AsioCallbackQueue::m_sigterm_fd))
     {
@@ -50,18 +51,19 @@ void AsioCallbackQueue::addCallback(const ros::CallbackInterfacePtr& callback,
 {
     ros::CallbackQueue::addCallback(callback, owner_id);
 #if BOOST_VERSION < 106600
-    m_io_context.post([this]
+    m_io_context->post([this]
 #else
-    boost::asio::post(m_io_context, [this]
+    boost::asio::post(*m_io_context, [this]
 #endif
-                      {
-                          // This post() will be called once per callback to process so
-                          // only process one at a time
-                          callOne();
-                      });
+                       {
+                           // This post() will be called once per callback to process so
+                           // only process one at a time
+                           callOne();
+                       });
 }
 
-void AsioCallbackQueue::replaceGlobalQueue(boost::asio::io_service& io_context)
+void AsioCallbackQueue::replaceGlobalQueue(
+    const std::shared_ptr<boost::asio::io_service>& io_context)
 {
     ros::g_global_queue.reset(new AsioCallbackQueue(io_context));
 }
@@ -98,6 +100,6 @@ void AsioCallbackQueue::handleSigTerm(const boost::system::error_code& error,
         }();
         std::cout << "Received signal " << signal_str << '\n';
 
-        m_io_context.stop();
+        m_io_context->stop();
     }
 }
